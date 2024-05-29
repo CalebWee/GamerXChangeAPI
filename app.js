@@ -2,22 +2,24 @@ const express = require('express');
 const mongoose = require('mongoose');
 const app = express();
 const PORT = process.env.PORT || 3001;
+const cors = require('cors');
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocs = require('./swagger.js');
+const swaggerFile = require('./swagger-output.json');
+const authRoutes = require('./routes/auth');
+const userRoutes = require('./routes/user');
 
-// Middleware
-app.use(express.json()); // Parse JSON bodies
-
-// Routes
-// Define your routes here
-
-// Start the server
+app.use(cors());
+app.use(express.json());
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
-
-mongoose.connect('mongodb://localhost:27017/')
-.then(() => {
-    console.log('Connected to MongoDB');
+mongoose.connect('mongodb://localhost:27017/GamerXChange', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
 })
-.catch((error) => {
-    console.error('Error connecting to MongoDB:', error);
-});
+.then(() => console.log('MongoDB connected'))
+.catch(err => console.error('MongoDB connection error:', err));
+app.use('/auth', authRoutes);
+app.use('/user', userRoutes)
+app.use('/api', swaggerUi.serve, swaggerUi.setup(swaggerFile));
